@@ -1,36 +1,13 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Scaler Sales Copilot
 
-## Getting Started
+## 1. What you built
 
-First, run the development server:
+I built an AI copilot for Scaler BDAs that runs entirely on WhatsApp. Before a call, a BDA enters a lead's CRM profile — including a short questionnaire on career goals, technical activity, and AI usage — and the app generates and sends a short, honest pre-call brief straight to the BDA's own WhatsApp: a plain-English read on who the lead is, a likely persona, resonant angles, expected objections, an opening hook, and a recommended Scaler course, all tagged fact vs. inferred vs. missing. No approval gate here since it's internal. After the call, the BDA feeds in either a pasted transcript or an audio recording (transcribed via Whisper on Groq); the app extracts the lead's actual open questions, answers each one with evidence grounded in a real Scaler program catalog (never fabricated stats or outcomes), builds a branded 2–3 page PDF whose accent color and content visibly differ lead-to-lead based on which course fits them, and puts it in front of the BDA for Approve / Edit / Skip before anything reaches the lead's own WhatsApp.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 2. One failure I found
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Meera's profile (0 YoE, no LinkedIn, most CRM fields blank) has almost no signal, yet the PDF's course-pitch still names one program with full confidence — there's no hedge field on that output, unlike the nudge's fact/inferred/missing split. Thin input yields a confident guess, not an honest "need more info."
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 3. Scale plan
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Two things break first. First, state: leads and call inputs live in cookies and local temp files (no database, no object storage), built for one BDA testing one lead at a time — zero multi-tenancy, and temp files won't survive across serverless instances at any real concurrency. Second, WhatsApp Sandbox requires each recipient to manually text a join code before receiving anything — fine for a demo, but it cannot onboard real leads at volume. Production needs a real datastore plus an approved WhatsApp Business API sender, not incremental fixes to what exists today.
